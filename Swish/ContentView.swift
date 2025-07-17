@@ -43,6 +43,15 @@ struct ContentView: View {
                     dotCount = (dotCount + 1) % 4
                 }
                 .accessibilityIdentifier("QuitHint")
+            
+            // Settings Button
+            Button("Settings") {
+                SettingsPopoverController.shared.toggle()
+            }
+            .controlSize(.small)
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier( "SettingsButton" )
+            
             // Quit button
             Button("Quit") {
                 NSApplication.shared.terminate(nil)

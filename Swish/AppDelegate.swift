@@ -9,10 +9,14 @@ import Cocoa
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    static var shared: AppDelegate!
+
     var statusItem: NSStatusItem!
     var popover: NSPopover!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
+
         let popover = NSPopover()
         popover.contentSize = NSSize(width: 300, height: 200)
         popover.behavior = .transient

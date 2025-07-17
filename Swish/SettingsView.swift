@@ -17,7 +17,14 @@ struct SettingsView: View {
             Toggle("Auto-enable on startup", isOn: $autoEnableOnLaunch)
                 .toggleStyle(SwitchToggleStyle())
                 .font(.body)
+            Divider()
+            Text("Swish v1.0 – Built with ❤️ by Keys")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
         }
+        .padding()
+        .frame(width: 250)
     }
 }
 
