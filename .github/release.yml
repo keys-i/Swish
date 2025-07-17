@@ -1,0 +1,55 @@
+name: Build and Release DMG
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v2
+        with:
+          xcode-version: '15'  # adjust as needed
+
+      - name: Build macOS app
+        run: |
+          xcodebuild clean build \
+            -scheme Swish \
+            -configuration Release \
+            -derivedDataPath build \
+            -sdk macosx
+
+      - name: Create DMG installer
+        run: |
+          # Install create-dmg CLI if not installed
+          if ! command -v create-dmg &> /dev/null; then
+            npm install --global create-dmg
+          fi
+
+          # Prepare paths
+          APP_PATH=build/Build/Products/Release/Swish.app
+          DMG_NAME=Swish-${{ github.ref_name }}.dmg
+
+          # Create DMG with Applications folder link
+          create-dmg "$APP_PATH" \
+            --overwrite \
+            --out=./ \
+            --app-drop-link 200 150 \
+            --window-size 500 300 \
+            --icon-size 100 \
+            --icon "Swish.app" 125 150 \
+            --background none \
+            "$DMG_NAME"
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Swish-DMG
+          path: Swish-*.dmg
