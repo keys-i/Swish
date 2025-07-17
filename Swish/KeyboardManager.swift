@@ -10,19 +10,34 @@ import Combine
 
 class KeyboardManager: ObservableObject {
     static let shared = KeyboardManager()
-    
-    @Published var keyboardEnabled: Bool = false {
-        didSet {
-            if keyboardEnabled {
-                KeyboardInterceptor.shared.startIntercepting()
-            } else {
-                KeyboardInterceptor.shared.stopIntercepting()
+
+    @Published var keyboardEnabled: Bool = false
+
+    private var cancellable: AnyCancellable?
+
+    init() {
+        cancellable = $keyboardEnabled
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { enabled in
+                print("🔁 keyboardEnabled changed to \(enabled)")
+
+                if enabled {
+                    print("🟢 Showing overlay")
+                    CleaningOverlayWindow.shared.show()
+                    print("🟢 Starting interceptor")
+                    KeyboardInterceptor.shared.startIntercepting()
+                } else {
+                    print("🔴 Hiding overlay")
+                    CleaningOverlayWindow.shared.hide()
+                    print("🔴 Stopping interceptor")
+                    KeyboardInterceptor.shared.stopIntercepting()
+                }
             }
-        }
     }
-    
-    // Internal method for test mocking
+
     func toggleKeyboardLock() {
+        print("↔️ Toggling lock")
         keyboardEnabled.toggle()
     }
 }
