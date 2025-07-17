@@ -10,24 +10,37 @@ import SwiftUI
 
 final class SettingsPopoverController {
     static let shared = SettingsPopoverController()
-    private var popover: NSPopover?
     
-    func toggle() {
-        if let popover = popover, popover.isShown {
+    init() {
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.close()
+        }
+    }
+
+    private var popover: NSPopover = {
+        let popover = NSPopover()
+        popover.contentSize = NSSize(width: 240, height: 160)
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: SettingsView())
+        return popover
+    }()
+    
+    func toggle(relativeTo rect: NSRect, of view: NSView) {
+        if popover.isShown {
             popover.performClose(nil)
         } else {
-            show()
+            popover.show(relativeTo: rect, of: view, preferredEdge: .maxY)
+            popover.contentViewController?.view.window?.becomeKey()
         }
     }
     
-    private func show() {
-        guard let statusItemButton = AppDelegate.shared?.statusItem.button else { return }
-        
-        let popover = NSPopover()
-        popover.contentSize = NSSize(width: 260, height: 140)
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: SettingsView())
-        popover.show(relativeTo: statusItemButton.bounds, of: statusItemButton, preferredEdge: .minX)
+    func close() {
+        if popover.isShown {
+            popover.performClose(nil)
+        }
     }
-    
 }
